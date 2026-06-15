@@ -130,7 +130,7 @@ canvas{display:block;width:100%;border-radius:8px;background:#fff;touch-action:n
     </div>
 
     <div class="verify-block">
-      <p id="VP">Piazza i punti sul piano, poi verifica!</p>
+      <p id="VP">Inserisci i punti sul piano, poi verifica!</p>
       <button class="dbtn" id="DB" onclick="A.verify()" disabled>verifica</button>
     </div>
 
@@ -214,7 +214,7 @@ var A = (function(){
     document.getElementById('C1').className='step act';
     document.getElementById('C2').className='step dim';
     document.getElementById('DB').disabled=true;
-    document.getElementById('VP').textContent='Piazza i punti sul piano, poi verifica!';
+    document.getElementById('VP').textContent='Inserisci i punti sul piano, poi verifica!';
     document.getElementById('FBT').textContent=''; document.getElementById('FBT').className='fb-text';
     document.getElementById('FBE').textContent='🤔';
     document.getElementById('FBS').textContent='';
@@ -267,7 +267,7 @@ var A = (function(){
       document.getElementById('SL2').disabled=true;
       document.getElementById('C2').className='step done';
       cv.style.cursor='crosshair';
-      document.getElementById('PH').textContent='Clicca sul piano per piazzare A, poi B. Trascina per spostarli.';
+      document.getElementById('PH').textContent='Clicca sul piano per inserire A, poi B. Trascina per spostarli.';
       document.getElementById('FBE').textContent='😃';
     }
     draw();
@@ -275,7 +275,7 @@ var A = (function(){
 
   function verify(){
     if(placed.length<2){
-      document.getElementById('PH').textContent='Piazza prima entrambi i punti sul piano!';
+      document.getElementById('PH').textContent='Inserisci prima entrambi i punti sul piano!';
       return;
     }
     var tol=0.6, a=placed[0], b=placed[1];
@@ -325,7 +325,7 @@ var A = (function(){
       placed.push({gx:Math.round(g[0]),gy:Math.round(g[1])});
       if(placed.length===2){
         document.getElementById('DB').disabled=false;
-        document.getElementById('PH').textContent='Punti piazzati! Trascina per aggiustare, poi premi Verifica.';
+        document.getElementById('PH').textContent='Punti inseriti! Trascina per modificare, poi premi Verifica.';
       }
       draw();
     }
