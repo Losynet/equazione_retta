@@ -341,7 +341,9 @@ var A = (function(){
     if(drag>=0){
       var g=toG(pos[0],pos[1]);
       placed[drag]={gx:Math.round(g[0]),gy:Math.round(g[1])};
-      draw(); return;
+      draw();
+      if(attempted) checkRealtime();
+      return;
     }
     var hit=hitTest(pos[0],pos[1]);
     cv.style.cursor=hit>=0?'grab':placed.length<2?'crosshair':'default';
@@ -350,6 +352,27 @@ var A = (function(){
   function updateCursor(){
     if(!p1ok||!p2ok||verified){cv.style.cursor='default';return;}
     cv.style.cursor=placed.length<2?'crosshair':'default';
+  }
+
+  function checkRealtime(){
+    if(placed.length<2||verified) return;
+    var tol=0.6, a=placed[0], b=placed[1];
+    var okAa=Math.abs(a.gx-pt1.x)<tol&&Math.abs(a.gy-pt1.y)<tol;
+    var okAb=Math.abs(b.gx-pt1.x)<tol&&Math.abs(b.gy-pt1.y)<tol;
+    var okBa=Math.abs(a.gx-pt2.x)<tol&&Math.abs(a.gy-pt2.y)<tol;
+    var okBb=Math.abs(b.gx-pt2.x)<tol&&Math.abs(b.gy-pt2.y)<tol;
+    var ok=(okAa&&okBb)||(okAb&&okBa);
+    if(ok){
+      verified=true; attempted=false;
+      cv.style.cursor='default';
+      document.getElementById('FBT').textContent='GIUSTO!!!';
+      document.getElementById('FBT').className='fb-text ok';
+      document.getElementById('FBE').textContent='😄';
+      document.getElementById('FBS').textContent='Ottimo lavoro! Hai tracciato la retta correttamente.';
+      document.getElementById('DB').disabled=true;
+      document.getElementById('PH').textContent='';
+      draw();
+    }
   }
 
   function draw(){
