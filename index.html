@@ -148,7 +148,7 @@ var A = (function(){
   var M=2, Q=1, lv=1;
   var pt1=null, pt2=null;
   var p1ok=false, p2ok=false;
-  var placed=[], drag=-1, verified=false;
+  var placed=[], drag=-1, verified=false, attempted=false;
 
   var ZOOMS=[
     {sc:30,range:8,lab:'±8'},
@@ -284,19 +284,23 @@ var A = (function(){
     var okBa=Math.abs(a.gx-pt2.x)<tol&&Math.abs(a.gy-pt2.y)<tol;
     var okBb=Math.abs(b.gx-pt2.x)<tol&&Math.abs(b.gy-pt2.y)<tol;
     var ok=(okAa&&okBb)||(okAb&&okBa);
-    verified=true;
-    cv.style.cursor='default';
     var fbt=document.getElementById('FBT');
     var fbe=document.getElementById('FBE');
     var fbs=document.getElementById('FBS');
     if(ok){
+      verified=true;
+      cv.style.cursor='default';
       fbt.textContent='GIUSTO!!!'; fbt.className='fb-text ok';
       fbe.textContent='😄';
       fbs.textContent='Ottimo lavoro! Hai tracciato la retta correttamente.';
+      document.getElementById('DB').disabled=true;
     } else {
+      verified=false; attempted=true;
+      cv.style.cursor=placed.length<2?'crosshair':'default';
       fbt.textContent='ERRATO....'; fbt.className='fb-text ko';
       fbe.textContent='😢';
-      fbs.textContent='Le coordinate non coincidono con i valori calcolati. Riprova!';
+      fbs.textContent='Riposiziona i punti sul piano e riprova!';
+      document.getElementById('PH').textContent='Trascina i punti nella posizione corretta e ripremi Verifica.';
     }
     draw();
   }
@@ -380,6 +384,17 @@ var A = (function(){
       var p0=toC(-r2,calcY(-r2)), p1e=toC(r2,calcY(r2));
       ctx.strokeStyle='#22aa22'; ctx.lineWidth=3; ctx.setLineDash([]);
       ctx.beginPath();ctx.moveTo(p0[0],p0[1]);ctx.lineTo(p1e[0],p1e[1]);ctx.stroke();
+    } else if(attempted && placed.length===2){
+      var pa=toC(placed[0].gx,placed[0].gy), pb=toC(placed[1].gx,placed[1].gy);
+      var dx=pb[0]-pa[0], dy=pb[1]-pa[1];
+      var len=Math.sqrt(dx*dx+dy*dy)||1;
+      var ext=Math.max(cv.width,cv.height)*2;
+      var ux=dx/len, uy=dy/len;
+      ctx.strokeStyle='#cc2222'; ctx.lineWidth=2.5; ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(pa[0]-ux*ext, pa[1]-uy*ext);
+      ctx.lineTo(pa[0]+ux*ext, pa[1]+uy*ext);
+      ctx.stroke();
     }
 
     var lbls=['A','B'];
@@ -397,7 +412,7 @@ var A = (function(){
       ctx.fillText(lbls[i]+' = ('+pl.gx+', '+pl.gy+')',pp[0]+radius+4,pp[1]-6);
     }
 
-    if(placed.length===2&&!verified){
+    if(placed.length===2&&!verified&&!attempted){
       var pa=toC(placed[0].gx,placed[0].gy), pb=toC(placed[1].gx,placed[1].gy);
       ctx.strokeStyle='rgba(26,85,204,0.2)'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
       ctx.beginPath();ctx.moveTo(pa[0],pa[1]);ctx.lineTo(pb[0],pb[1]);ctx.stroke();
