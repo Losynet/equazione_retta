@@ -203,7 +203,12 @@ canvas{display:block;width:100%;background:#fff;border:1px solid #eee;border-rad
 <div class="tpanel" id="tab-esplora">
 <div class="mqapp">
   <div class="mqleft">
-    <canvas id="CV2" height="420"></canvas>
+    <canvas id="CV2"></canvas>
+    <div class="zrow">
+      <label>Zoom</label>
+      <input type="range" id="ZS2" min="1" max="5" step="1" value="2" oninput="mqSetZoom(+this.value)">
+      <span class="zlbl" id="ZL2">±9</span>
+    </div>
     <div style="font-size:12px;color:#888;text-align:center">Muovi gli slider per vedere come cambia la retta</div>
   </div>
   <div class="mqright">
@@ -247,7 +252,15 @@ function showTab(name, btn) {
   document.querySelectorAll('.tbtn').forEach(function(b){ b.classList.remove('on'); });
   document.getElementById('tab-' + name).classList.add('on');
   btn.classList.add('on');
-  if (name === 'esplora') { setTimeout(mqInit, 50); }
+  if (name === 'esplora') {
+    // Aspetta che il pannello sia visibile e abbia dimensioni reali
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        mqInit();
+        if(mqReady) mqResize();
+      });
+    });
+  }
 }
 
 // ===================== ESERCIZIO =====================
@@ -547,6 +560,15 @@ var A = (function(){
 
 // ===================== ESPLORA MQ =====================
 var mqReady=false, cv2, ctx2, OX2, OY2, MQ=2, QQ=1;
+var ZOOMS2=[
+  {sc:38,range:7, lab:'±7'},
+  {sc:30,range:9, lab:'±9'},
+  {sc:22,range:12,lab:'±12'},
+  {sc:15,range:18,lab:'±18'},
+  {sc:10,range:26,lab:'±26'}
+];
+var zi2=1;
+function mqSetZoom(val){ zi2=val-1; document.getElementById('ZL2').textContent=ZOOMS2[zi2].lab; mqDraw(); }
 
 function mqInit(){
   if(mqReady) return;
@@ -555,12 +577,14 @@ function mqInit(){
   ctx2=cv2.getContext('2d');
   mqReady=true;
   window.addEventListener('resize', mqResize);
-  setTimeout(function(){ mqResize(); mqUpdate(); }, 30);
+  mqResize();
+  mqUpdate();
 }
 
 function mqResize(){
   if(!cv2) return;
   var w=cv2.parentElement.clientWidth-28;
+  if(w<=0) return; // pannello non ancora visibile
   cv2.width=Math.min(w,560); cv2.height=Math.round(cv2.width*0.80);
   OX2=Math.round(cv2.width*0.47); OY2=Math.round(cv2.height*0.50);
   mqDraw();
@@ -598,13 +622,13 @@ function mqReset(){
 }
 
 function mqCalcY(x){ return MQ*x+QQ; }
-function toC2(gx,gy){ var SC=Math.round(cv2.width/15); return[OX2+gx*SC, OY2-gy*SC]; }
+function toC2(gx,gy){ var SC=ZOOMS2[zi2].sc; return[OX2+gx*SC, OY2-gy*SC]; }
 
 function mqDraw(){
   if(!cv2||!ctx2) return;
   var W=cv2.width, H=cv2.height;
-  var SC=Math.round(W/15);
-  var r=Math.ceil(W/(2*SC))+1, step=r>12?5:r>7?2:1;
+  var SC=ZOOMS2[zi2].sc;
+  var r=ZOOMS2[zi2].range, step=r>15?5:r>9?2:1;
   ctx2.clearRect(0,0,W,H);
   ctx2.fillStyle='#fff'; ctx2.fillRect(0,0,W,H);
 
@@ -637,7 +661,7 @@ function mqDraw(){
   ctx2.fillText('q = '+fmtMQ(QQ), qp[0]+11, qp[1]+(QQ>=0?-7:16));
 
   // Retta
-  var ext=r+2, p0=toC2(-ext,mqCalcY(-ext)), p1e=toC2(ext,mqCalcY(ext));
+  var ext=ZOOMS2[zi2].range+2, p0=toC2(-ext,mqCalcY(-ext)), p1e=toC2(ext,mqCalcY(ext));
   ctx2.strokeStyle='#cc3300'; ctx2.lineWidth=3; ctx2.setLineDash([]);
   ctx2.beginPath();ctx2.moveTo(p0[0],p0[1]);ctx2.lineTo(p1e[0],p1e[1]);ctx2.stroke();
 
