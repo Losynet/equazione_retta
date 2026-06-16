@@ -7,7 +7,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f0f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:12px;gap:10px}
-.app{display:grid;grid-template-columns:1fr 320px;gap:0;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #ddd;max-width:1020px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.app{display:grid;grid-template-columns:1fr 320px;gap:0;background:#fff;border-radius:0 0 16px 16px;overflow:hidden;border:1px solid #ddd;border-top:none;max-width:1020px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,.08)}
 @media(max-width:680px){.app{grid-template-columns:1fr}}
 .left{padding:12px;border-right:1px solid #e8e8e8}
 canvas{display:block;width:100%;border-radius:8px;background:#fff;touch-action:none;cursor:default}
@@ -74,7 +74,7 @@ canvas{display:block;width:100%;border-radius:8px;background:#fff;touch-action:n
 .tab-btn:first-child{border-radius:12px 0 0 0}
 .tab-btn:last-child{border-radius:0 12px 0 0}
 .tab-panel{display:none}
-.tab-panel.on{display:contents}
+.tab-panel.on{display:block;width:100%;max-width:1020px}
 
 /* ESPLORA MQ */
 .mq-app{width:100%;max-width:1020px;background:#fff;border-radius:0 0 16px 16px;border:1px solid #ddd;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden;display:grid;grid-template-columns:1fr 300px;gap:0}
@@ -272,8 +272,7 @@ var A = (function(){
     cv.addEventListener('touchmove',function(e){e.preventDefault();onMove(e.touches[0]);},{passive:false});
     cv.addEventListener('touchend',function(){drag=-1;});
     window.addEventListener('resize',resize);
-    resize();
-    newGame();
+    requestAnimationFrame(function(){ resize(); newGame(); });
   }
 
   function resize(){
@@ -540,7 +539,7 @@ var A = (function(){
 })();
 
 // ---- TAB SWITCHING ----
-function showTab(name, btn) {
+window.showTab = function showTab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('on');});
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('on');});
   document.getElementById('tab-'+name).classList.add('on');
@@ -551,14 +550,13 @@ function showTab(name, btn) {
 // ---- ESPLORA MQ ----
 var cv2, ctx2, OX2, OY2, SC2=38, MQ=2, QQ=1, mqReady=false;
 
-function mqInit(){
+window.mqInit = function mqInit(){
   if(mqReady) return;
   mqReady=true;
   cv2=document.getElementById('CV2');
   ctx2=cv2.getContext('2d');
   window.addEventListener('resize', mqResize);
-  mqResize();
-  mqUpdate();
+  requestAnimationFrame(function(){ mqResize(); mqUpdate(); });
 }
 
 function mqResize(){
@@ -572,7 +570,7 @@ function mqResize(){
 
 function fmtMQ(v){ return v===Math.round(v)?String(v):String(Math.round(v*10)/10); }
 
-function mqUpdate(){
+window.mqUpdate = function mqUpdate(){
   MQ=parseFloat(document.getElementById('MS').value);
   QQ=parseFloat(document.getElementById('QS').value);
   var ms=fmtMQ(MQ), qs=fmtMQ(Math.abs(QQ));
@@ -596,7 +594,7 @@ function mqUpdate(){
   if(mqReady) mqDraw();
 }
 
-function mqReset(){
+window.mqReset = function mqReset(){
   MQ=2; QQ=1;
   document.getElementById('MS').value=2;
   document.getElementById('QS').value=1;
